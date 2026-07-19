@@ -450,6 +450,15 @@
   100% { transform: translateY(10%); }
 }
 
+/* ── Glitch horizontal scan lines ── */
+@keyframes glitch-line {
+  0%, 90%, 100% { opacity: 0; }
+  92% { opacity: 1; }
+  94% { opacity: 0; }
+  96% { opacity: 0.6; }
+  98% { opacity: 0; }
+}
+
 /* ── HUD Scan Line ── */
 @keyframes scan-line {
   0%   { transform: translateY(-100%); }

@@ -1,4 +1,11 @@
+import dns from "node:dns";
 import mongoose from "mongoose";
+
+// Some local networks/ISPs block UDP SRV lookups needed for mongodb+srv://.
+// Force a public resolver so `mongodb+srv` URIs resolve correctly.
+if (process.env.NODE_ENV !== "production") {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+}
 
 const MONGODB_URI = process.env.MONGODB_URI;
 

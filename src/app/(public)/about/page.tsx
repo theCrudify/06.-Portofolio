@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/shared/container";
+import { ProfileAvatar } from "@/components/public/profile-avatar";
 import { getProfile } from "@/modules/profile/profile.service";
 import { getPublishedProjects } from "@/modules/projects/project.service";
 
@@ -47,14 +48,12 @@ export default async function AboutPage() {
           {/* Left column - sticky avatar + name */}
           <div className="lg:sticky lg:top-20 lg:self-start">
             <div className="flex flex-col items-start gap-4">
-              <div className="flex size-28 items-center justify-center border border-accent/50 bg-surface text-4xl font-extrabold tracking-tighter text-accent/40">
-                {profile
-                  ? profile.fullName
-                      .split(" ")
-                      .map((part) => part[0])
-                      .slice(0, 2)
-                      .join("")
-                  : "?"}
+              <div className="relative size-28 overflow-hidden border border-accent/50 bg-surface">
+                <ProfileAvatar
+                  fullName={profile?.fullName ?? ""}
+                  src="/images/profile-photo.png"
+                  variant="sidebar"
+                />
               </div>
               <div>
                 <h1 className="text-h1 text-foreground">

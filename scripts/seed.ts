@@ -1,5 +1,10 @@
 import "dotenv/config";
+import dns from "node:dns";
 import mongoose from "mongoose";
+
+// Some local networks/ISPs block UDP SRV lookups needed for mongodb+srv://.
+// Force a public resolver so `mongodb+srv` URIs resolve correctly.
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 import { ProfileModel } from "../src/modules/profile/profile.model";
 import { ProjectModel } from "../src/modules/projects/project.model";
 import { ExperienceModel } from "../src/modules/experiences/experience.model";
@@ -52,7 +57,8 @@ async function seed() {
       { label: "Enterprise Projects Delivered", value: "7+", order: 1 },
       { label: "Enterprise Clients", value: "4", order: 2 },
       { label: "Backend Ecosystems", value: "3", order: 3 },
-      { label: "Years of Experience", value: "2+", order: 4 },
+      { label: "Internship Experience", value: "1 Year", order: 4 },
+      { label: "Professional Experience", value: "1+ Year", order: 5 },
     ],
     isPublished: true,
   });

@@ -5,6 +5,7 @@ import { Container } from "@/components/shared/container";
 import { DataStream } from "@/components/public/data-stream";
 import { HudOverlay } from "@/components/public/hud-overlay";
 import { TypingText } from "@/components/public/typing-text";
+import { ProfileAvatar } from "@/components/public/profile-avatar";
 import { getProfile } from "@/modules/profile/profile.service";
 import { getFeaturedProjects } from "@/modules/projects/project.service";
 import { getRecentExperiences } from "@/modules/experiences/experience.service";
@@ -146,16 +147,12 @@ export default async function Home() {
             </div>
 
             <div className="hidden lg:block">
-              <div className="hologram mx-auto flex max-w-[360px] aspect-square w-full items-center justify-center border border-accent/50 bg-surface animate-accent-pulse">
-                <span className="font-mono text-6xl font-extrabold tracking-tighter text-accent/30">
-                  {profile
-                    ? profile.fullName
-                        .split(" ")
-                        .map((part) => part[0])
-                        .slice(0, 2)
-                        .join("")
-                    : "?"}
-                </span>
+              <div className="hologram mx-auto max-w-[480px] aspect-square w-full overflow-hidden border border-accent/50 bg-surface animate-accent-pulse">
+                <ProfileAvatar
+                  fullName={profile?.fullName ?? ""}
+                  src="/images/profile-photo.png"
+                  variant="hero"
+                />
               </div>
             </div>
           </div>
