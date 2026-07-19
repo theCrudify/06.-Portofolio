@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 // Force a public resolver so `mongodb+srv` URIs resolve correctly.
 if (process.env.NODE_ENV !== "production") {
   dns.setServers(["8.8.8.8", "1.1.1.1"]);
+  console.log("[mongodb] dns servers set to", dns.getServers());
 }
 
 const MONGODB_URI = process.env.MONGODB_URI;
