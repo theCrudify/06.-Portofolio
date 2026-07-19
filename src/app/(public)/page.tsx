@@ -164,7 +164,7 @@ export default async function Home() {
         <section>
           <AnimatedSection>
             <Container>
-              <div className="grid grid-cols-2 gap-px lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-px lg:grid-cols-5">
                 {[...profile.statistics]
                   .sort((a, b) => a.order - b.order)
                   .map((stat) => (
