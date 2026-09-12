@@ -4,7 +4,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
-import { getSiteSettings } from "@/modules/settings/site-settings.service";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,18 +16,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jidan Fatahillah — Full Stack Web Engineer",
+  title: "Jidan Fatahillah — Engineering Portfolio",
   description:
     "Portfolio of Jidan Fatahillah, a Full Stack Web Engineer specializing in enterprise applications, business-process systems, SAP integration, and external API integration.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const siteSettings = await getSiteSettings();
-
   return (
     <html
       lang="en"
@@ -43,9 +40,7 @@ export default async function RootLayout({
           </div>
           <Footer
             fullName="Jidan Fatahillah"
-            githubUrl={siteSettings?.socialLinks?.github}
-            linkedinUrl={siteSettings?.socialLinks?.linkedin}
-            publicEmail={siteSettings?.publicEmail}
+            githubUrl="https://github.com/theCrudify"
           />
         </ThemeProvider>
       </body>

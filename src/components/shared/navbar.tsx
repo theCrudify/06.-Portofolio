@@ -8,8 +8,8 @@ import { FullscreenToggle } from "./fullscreen-toggle";
 import { Container } from "./container";
 
 const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/projects", label: "Projects" },
+  { href: "/", label: "Overview" },
+  { href: "/#projects", label: "GitHub Work" },
   { href: "/experience", label: "Experience" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -25,10 +25,10 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-accent/30 bg-background">
+      <header className="sticky top-0 z-50 border-b border-accent/20 bg-background/90 backdrop-blur-xl">
         <Container className="flex h-16 items-center justify-between">
           <Link href="/" className="font-mono text-lg font-bold tracking-tight text-foreground">
-            jidan<span className="text-accent">.</span>
+            JF<span className="text-accent">/</span>DEV
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex">

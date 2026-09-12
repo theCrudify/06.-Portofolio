@@ -1,355 +1,99 @@
-import Link from "next/link";
-import { ProjectCard, type ProjectCardData } from "@/components/public/project-card";
-import { AnimatedSection } from "@/components/public/animated-section";
-import { Container } from "@/components/shared/container";
-import { DataStream } from "@/components/public/data-stream";
-import { HudOverlay } from "@/components/public/hud-overlay";
-import { TypingText } from "@/components/public/typing-text";
-import { ProfileAvatar } from "@/components/public/profile-avatar";
-import { getProfile } from "@/modules/profile/profile.service";
-import { getFeaturedProjects } from "@/modules/projects/project.service";
-import { getRecentExperiences } from "@/modules/experiences/experience.service";
-import { getSkillCategories } from "@/modules/skills/skill-category.service";
-import { getAllSkills } from "@/modules/skills/skill.service";
-import { getSiteSettings } from "@/modules/settings/site-settings.service";
+"use client";
 
-export const dynamic = "force-dynamic";
+import Image from "next/image";
+import { useMemo, useState } from "react";
 
-const AVAILABILITY_LABEL: Record<string, string> = {
-  open: "Available for new opportunities",
-  limited: "Limited availability",
-  unavailable: "Not currently available",
-};
+const projects = [
+  { name: "EMCS App", repo: "emcs-app", type: "Frontend", description: "Modern operational dashboard with forms, reporting, and data visualization for structured enterprise workflows.", stack: ["React 19", "TypeScript", "Vite", "Tailwind", "Recharts"], accent: "violet" },
+  { name: "Enterprise Starter", repo: "StarterV1", type: "Backend", description: "Reusable, security-minded backend foundation for enterprise APIs, authentication, validation, and scalable services.", stack: ["Node.js", "Express", "TypeScript", "Prisma", "Redis"], accent: "blue" },
+  { name: "Technical Docs API", repo: "New_Godoc_BE", type: "Backend", description: "Documentation service designed around secure uploads, dual-database workflows, scheduled jobs, and production logging.", stack: ["Express", "Prisma", "Redis", "Zod", "Winston"], accent: "cyan" },
+  { name: "KPIN Portal", repo: "FE_KPIN", type: "Frontend", description: "Supplier-facing portal and workflow UI built to make multi-role enterprise processes clear and dependable.", stack: ["React", "React Router", "REST API"], accent: "orange" },
+  { name: "Portfolio System", repo: "06.-Portofolio", type: "Full Stack", description: "This modular portfolio platform with content management, protected administration, and a public project showcase.", stack: ["Next.js 16", "React 19", "MongoDB", "Tailwind"], accent: "lime" },
+  { name: "miniOS", repo: "miniOS", type: "Experiment", description: "A compact public engineering experiment focused on learning, systems thinking, and building from first principles.", stack: ["Systems", "Open Source"], accent: "pink" },
+];
 
-function formatPeriod(startDate: Date, endDate: Date | null | undefined, isCurrent: boolean) {
-  const formatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
-  const start = formatter.format(new Date(startDate));
-  const end = isCurrent || !endDate ? "Present" : formatter.format(new Date(endDate));
-  return `${start} — ${end}`;
-}
+const filters = ["All", "Full Stack", "Backend", "Frontend", "Experiment"];
 
-export default async function Home() {
-  const [profile, featuredProjects, recentExperiences, skillCategories, allSkills, siteSettings] =
-    await Promise.all([
-      getProfile(),
-      getFeaturedProjects(),
-      getRecentExperiences(3),
-      getSkillCategories(),
-      getAllSkills(),
-      getSiteSettings(),
-    ]);
-
-  const projectCards: ProjectCardData[] = featuredProjects.map((project) => ({
-    slug: project.slug,
-    title: project.title,
-    clientLabel: project.publicClientLabel,
-    description: project.shortDescription,
-    technologies: [...project.technologyIds, ...project.integrationIds].map(
-      (skill) => skill.name
-    ),
-    industry: project.industryId?.name ?? "Enterprise",
-    role: project.role || "Full Stack Web Engineer",
-    year: project.startDate ? new Date(project.startDate).getFullYear().toString() : undefined,
-  }));
-
-  const [largeProject, ...smallProjects] = projectCards;
-
-  const skillsByCategory = new Map<string, typeof allSkills>();
-  for (const skill of allSkills) {
-    const key = String(skill.categoryId);
-    skillsByCategory.set(key, [...(skillsByCategory.get(key) ?? []), skill]);
-  }
-
-  const availabilityLabel = profile?.availabilityStatus
-    ? AVAILABILITY_LABEL[profile.availabilityStatus] ?? null
-    : null;
+export default function Home() {
+  const [activeFilter, setActiveFilter] = useState("All");
+  const visibleProjects = useMemo(() => projects.filter((project) => activeFilter === "All" || project.type === activeFilter), [activeFilter]);
 
   return (
-    <div className="scanlines">
-      {/* Hero */}
-      <HudOverlay as="section" className="relative isolate overflow-hidden cyber-grid" showCoordinates={true} showScanLine={false} label="SYS::HOME">
-        <DataStream />
-        <Container>
-          <div className="relative z-[1] grid gap-10 py-16 lg:grid-cols-[1.3fr_1fr] lg:items-center lg:py-24">
-            <div>
-              {availabilityLabel && (
-                <p className="flicker mb-5 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider text-success">
-                  <span className="relative flex size-2">
-                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-75" />
-                    <span className="relative inline-flex size-2 rounded-full bg-success" />
-                  </span>
-                  {availabilityLabel}
-                </p>
-              )}
-
-              <h1
-                className="glitch text-display text-foreground"
-                data-text={profile?.professionalTitle ?? "Profile not configured"}
-              >
-                {profile?.professionalTitle ?? "Profile not configured"}
-              </h1>
-
-              <p className="text-body-lg mt-6 max-w-xl text-muted">
-                <TypingText
-                  text={profile?.shortSummary ?? "Add a profile document in the database to populate this section."}
-                  speed={20}
-                  cursor={false}
-                />
-              </p>
-
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/projects"
-                  className="inline-flex h-12 items-center justify-center border border-accent bg-accent px-6 text-[13px] font-bold uppercase tracking-wider text-accent-foreground transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_0_20px_var(--glow)]"
-                >
-                  View Projects
-                </Link>
-                <Link
-                  href="/resume"
-                  className="inline-flex h-12 items-center justify-center border border-border px-6 text-[13px] font-bold uppercase tracking-wider text-foreground transition-all duration-200 hover:border-accent/50 hover:text-accent"
-                >
-                  Download Resume
-                </Link>
-              </div>
-
-              {siteSettings && (
-                <div className="mt-8 flex items-center gap-5 text-[13px] font-bold uppercase tracking-wider text-muted">
-                  {siteSettings.socialLinks?.github && (
-                    <a
-                      href={siteSettings.socialLinks.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="transition-all duration-200 hover:text-accent"
-                    >
-                      GitHub
-                    </a>
-                  )}
-                  {siteSettings.socialLinks?.linkedin && (
-                    <a
-                      href={siteSettings.socialLinks.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="transition-all duration-200 hover:text-accent"
-                    >
-                      LinkedIn
-                    </a>
-                  )}
-                  {siteSettings.publicEmail && (
-                    <a
-                      href={`mailto:${siteSettings.publicEmail}`}
-                      className="transition-all duration-200 hover:text-accent"
-                    >
-                      Email
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="hidden lg:block">
-              <div className="hologram mx-auto max-w-[480px] aspect-square w-full overflow-hidden border border-accent/50 bg-surface animate-accent-pulse">
-                <ProfileAvatar
-                  fullName={profile?.fullName ?? ""}
-                  src="/images/profile-photo.png"
-                  variant="hero"
-                />
-              </div>
-            </div>
+    <main className="portfolio-dashboard">
+      <section className="dash-shell dash-hero" aria-labelledby="portfolio-title">
+        <div className="hero-copy">
+          <div className="eyebrow"><span /> PORTFOLIO / 2026</div>
+          <h1 id="portfolio-title">Jidan<br /><em>Fatahillah.</em></h1>
+          <p className="hero-role">Full Stack Web Engineer <span>—</span> Enterprise Applications &amp; Integration</p>
+          <p className="hero-summary">I turn complex business processes into reliable software—from architecture and APIs to polished interfaces, integrations, and production support.</p>
+          <div className="hero-actions">
+            <a className="dash-button primary" href="#projects">Explore work <span>↗</span></a>
+            <a className="dash-button" href="https://github.com/theCrudify" target="_blank" rel="noreferrer">GitHub profile</a>
           </div>
-        </Container>
-      </HudOverlay>
+        </div>
 
-      {/* Stats */}
-      {profile && profile.statistics.length > 0 && (
-        <section>
-          <AnimatedSection>
-            <Container>
-              <div className="grid grid-cols-2 gap-px lg:grid-cols-5">
-                {[...profile.statistics]
-                  .sort((a, b) => a.order - b.order)
-                  .map((stat) => (
-                    <div key={stat.label} className="bg-surface px-6 py-8">
-                      <p className="text-h2 font-extrabold tracking-tight text-accent">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-[12px] font-bold uppercase tracking-wider text-muted">{stat.label}</p>
-                    </div>
-                  ))}
-              </div>
-            </Container>
-          </AnimatedSection>
-        </section>
-      )}
-
-      {/* Featured Projects */}
-      <section className="py-12 lg:py-16">
-        <AnimatedSection>
-          <Container>
-            <div className="flex items-end justify-between gap-4 pb-4">
-              <div>
-                <p className="id-badge text-label text-accent">
-                  01. Selected Work
-                </p>
-                <h2 className="text-h2 mt-2 text-foreground">Featured Projects</h2>
-              </div>
-              <Link
-                href="/projects"
-                className="hidden text-[13px] font-bold uppercase tracking-wider text-muted transition-all duration-200 hover:text-accent sm:inline-flex"
-              >
-                View all
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="ml-1 size-4">
-                  <path fillRule="evenodd" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-                </svg>
-              </Link>
-            </div>
-
-            {largeProject ? (
-              <div className="mt-8 grid gap-5 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                  <ProjectCard project={largeProject} size="large" />
-                </div>
-                <div className="flex flex-col gap-5">
-                  {smallProjects.map((project) => (
-                    <ProjectCard key={project.slug} project={project} />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="mt-8 text-body text-muted">No featured projects published yet.</p>
-            )}
-
-            <Link
-              href="/projects"
-              className="mt-5 inline-flex text-[13px] font-bold uppercase tracking-wider text-muted transition-all hover:text-accent sm:hidden"
-            >
-              View all projects
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="ml-1 size-4">
-                <path fillRule="evenodd" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-              </svg>
-            </Link>
-          </Container>
-        </AnimatedSection>
+        <div className="hero-panel">
+          <div className="portrait-frame">
+            <Image src="/images/profile-photo.png" alt="Jidan Fatahillah" fill priority sizes="(max-width: 900px) 80vw, 420px" />
+            <div className="portrait-code">JF—23</div>
+          </div>
+          <div className="availability"><i /> Available for new opportunities</div>
+          <div className="quick-facts">
+            <div><b>7+</b><span>enterprise projects</span></div>
+            <div><b>4</b><span>client environments</span></div>
+            <div><b>3.74</b><span>GPA · cum laude</span></div>
+          </div>
+        </div>
       </section>
 
-      {/* Skills */}
-      {skillCategories.length > 0 && (
-        <section className="py-12 lg:py-16">
-          <AnimatedSection>
-            <Container>
-              <p className="id-badge text-label text-accent">02. What I Do</p>
-              <h2 className="text-h2 mt-2 text-foreground">Core Expertise</h2>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {skillCategories.map((category) => {
-                  const categorySkills = skillsByCategory.get(String(category._id)) ?? [];
-                  return (
-                    <div key={category.slug} className="cyber-card cyber-card-hover hud-frame-corners p-6">
-                      <h3 className="text-h4 text-foreground">{category.name}</h3>
-                      <p className="mt-2 text-[13px] font-bold uppercase tracking-wider text-muted">{category.description}</p>
-                      {categorySkills.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {categorySkills.slice(0, 5).map((skill) => (
-                            <span
-                              key={skill.slug}
-                              className="border border-border/50 bg-surface-muted px-2.5 py-1 text-[12px] font-bold uppercase tracking-wider text-muted transition-all duration-200 hover:border-accent/50 hover:text-accent"
-                            >
-                              {skill.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Container>
-          </AnimatedSection>
-        </section>
-      )}
-
-      {/* Experience */}
-      {recentExperiences.length > 0 && (
-        <section className="py-12 lg:py-16">
-          <AnimatedSection>
-            <Container>
-              <p className="id-badge text-label text-accent">03. Experience</p>
-              <h2 className="text-h2 mt-2 text-foreground">Recent Experience</h2>
-
-              <div className="cyber-card hud-frame-corners">
-                {recentExperiences.map((experience) => (
-                  <Link
-                    key={String(experience._id)}
-                    href="/experience"
-                    className="group flex flex-col gap-2 px-6 py-5 transition-all duration-200 hover:bg-accent/5 hover:pl-8 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8 sm:hover:pl-8"
-                  >
-                    <div className="shrink-0 sm:w-40">
-                      <p className="text-[12px] font-bold uppercase tracking-wider text-muted">
-                        {formatPeriod(
-                          experience.startDate,
-                          experience.endDate,
-                          experience.isCurrent ?? false
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-h4 text-foreground group-hover:text-accent transition-colors duration-200">
-                        {experience.position}
-                      </p>
-                      <p className="mt-1 text-[13px] font-bold uppercase tracking-wider text-muted">
-                        {experience.publicCompanyName}
-                        {experience.location ? ` · ${experience.location}` : ""}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </Container>
-          </AnimatedSection>
-        </section>
-      )}
-
-      {/* CTA */}
-      <section className="py-12 lg:py-16">
-        <AnimatedSection>
-          <Container>
-            <div className="cyber-card cyber-card-hover hud-frame-corners p-8 transition-all duration-200 sm:p-10">
-              <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  {availabilityLabel && (
-                    <p className="mb-2 text-[12px] font-bold uppercase tracking-wider text-success">
-                      {availabilityLabel}
-                    </p>
-                  )}
-                  <h2 className="text-h3 text-foreground">
-                    Have a project or opportunity in mind?
-                  </h2>
-                  <p className="mt-2 max-w-md text-body text-muted">
-                    I&apos;m open to full-time roles, freelance projects, and technical collaboration.
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-wrap items-center gap-4">
-                  <Link
-                    href="/contact"
-                    className="inline-flex h-12 items-center justify-center border border-accent bg-accent px-6 text-[13px] font-bold uppercase tracking-wider text-accent-foreground transition-all duration-200 hover:bg-accent-hover hover:shadow-[0_0_20px_var(--glow)]"
-                  >
-                    Get in Touch
-                  </Link>
-                  {siteSettings?.socialLinks?.linkedin && (
-                    <a
-                      href={siteSettings.socialLinks.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-12 items-center justify-center border border-border px-6 text-[13px] font-bold uppercase tracking-wider text-foreground transition-all duration-200 hover:border-accent/50 hover:text-accent"
-                    >
-                      LinkedIn
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Container>
-        </AnimatedSection>
+      <section className="dash-strip" aria-label="Core technology stack">
+        <span>NODE.JS</span><span>REACT</span><span>ANGULAR</span><span>.NET</span><span>GO</span><span>SQL SERVER</span><span>SAP B1</span><span>AZURE</span>
       </section>
-    </div>
+
+      <section className="dash-shell section-block" id="projects">
+        <div className="section-heading">
+          <div><p className="section-index">01 / PUBLIC WORK</p><h2>Selected repositories</h2></div>
+          <p>Public GitHub work, translated into the engineering capabilities behind each repository.</p>
+        </div>
+        <div className="project-filters" role="group" aria-label="Filter projects">
+          {filters.map((filter) => <button key={filter} className={activeFilter === filter ? "active" : ""} onClick={() => setActiveFilter(filter)}>{filter}</button>)}
+        </div>
+        <div className="project-grid">
+          {visibleProjects.map((project, index) => (
+            <article className={`project-tile accent-${project.accent}`} key={project.repo}>
+              <div className="project-top"><span>0{index + 1}</span><span>{project.type}</span></div>
+              <div className="project-symbol" aria-hidden="true">{project.name.slice(0, 2).toUpperCase()}</div>
+              <h3>{project.name}</h3>
+              <p>{project.description}</p>
+              <ul>{project.stack.map((item) => <li key={item}>{item}</li>)}</ul>
+              <a href={`https://github.com/theCrudify/${project.repo}`} target="_blank" rel="noreferrer">View repository <span>↗</span></a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="dash-shell section-block expertise-section">
+        <div className="section-heading"><div><p className="section-index">02 / ENGINEERING PROFILE</p><h2>Built for the whole lifecycle.</h2></div></div>
+        <div className="expertise-grid">
+          <article><span>01</span><h3>Product &amp; architecture</h3><p>Requirements, process mapping, prototyping, data modeling, system design, and pragmatic delivery planning.</p></article>
+          <article><span>02</span><h3>Backend &amp; integration</h3><p>Typed REST APIs, transactions, RBAC, logging, validation, SAP B1, customs, e-signature, and payment integrations.</p></article>
+          <article><span>03</span><h3>Frontend systems</h3><p>Responsive React and Angular interfaces, typed API layers, reusable components, dashboards, and role-based workflows.</p></article>
+          <article><span>04</span><h3>Production ownership</h3><p>Azure deployment, SQL performance, diagnostics, stability improvements, production support, and junior mentoring.</p></article>
+        </div>
+      </section>
+
+      <section className="dash-shell career-card">
+        <div className="career-heading"><p className="section-index">03 / CURRENTLY</p><h2>PT IDS Teknologi Indonesia</h2><p>Full Stack Web Engineer · Enterprise Applications &amp; Integration</p></div>
+        <div className="career-meta"><span>JUL 2025 — PRESENT</span><span>BANTEN, INDONESIA</span></div>
+        <p className="career-copy">Delivering enterprise systems across manufacturing, mining, procurement, inventory, production, customs, automated payments, digital signatures, and approval workflows.</p>
+        <div className="career-tags"><span>Architecture</span><span>Full-stack delivery</span><span>Enterprise integration</span><span>Mentoring</span></div>
+      </section>
+
+      <section className="dash-shell closing-panel">
+        <p>Have a complex process that needs a clear system?</p>
+        <h2>Let’s build something dependable.</h2>
+        <div><a href="/contact" className="dash-button primary">Start a conversation <span>↗</span></a><a href="/resume" className="text-link">View full résumé →</a></div>
+      </section>
+    </main>
   );
 }
